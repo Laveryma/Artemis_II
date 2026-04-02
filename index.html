@@ -25,39 +25,23 @@
           <p class="eyebrow">Artemis II family tracker v2</p>
           <h1>Follow Orion together.</h1>
           <p class="sub">A warmer little mission app for checking in at breakfast, after school, or right before bed.</p>
-
-          <div class="hero-links">
-            <a class="action-link" href="https://www.nasa.gov/trackartemis" target="_blank" rel="noopener">Live tracker</a>
-            <a class="action-link" href="https://www.nasa.gov/blogs/missions/2026/04/01/live-artemis-ii-launch-day-updates/" target="_blank" rel="noopener">Live updates</a>
-            <a class="action-link" href="https://www.nasa.gov/live/" target="_blank" rel="noopener">Live video</a>
-            <a class="action-link" href="https://www.nasa.gov/missions/artemis/nasas-artemis-ii-moon-mission-daily-agenda/" target="_blank" rel="noopener">Daily agenda</a>
-          </div>
-
-          <div class="hero-metrics">
-            <article class="metric">
-              <span class="label">Mission elapsed time</span>
-              <strong id="missionClock">Calculating...</strong>
-            </article>
-            <article class="metric">
-              <span class="label">Current mission phase</span>
-              <strong id="currentPhase">Working it out...</strong>
-            </article>
-            <article class="metric">
-              <span class="label">Flight day</span>
-              <strong id="flightDay">Loading...</strong>
-            </article>
-          </div>
         </div>
 
-        <div class="hero-stage">
-          <section class="orion-panel">
-            <div class="panel-head">
-              <p class="section-kicker">Live now</p>
-              <h2>Where is Orion now?</h2>
-              <p id="locationSummary" class="panel-copy">Best estimate from NASA's day-by-day plan. Use NASA's live tracker for the exact spacecraft position.</p>
-            </div>
+        <section class="orion-panel">
+          <div class="panel-head">
+            <p class="section-kicker">Live now</p>
+            <h2>Where is Orion now?</h2>
+            <p id="locationSummary" class="panel-copy">Best estimate from NASA's day-by-day plan. Use NASA's live tracker for the exact spacecraft position.</p>
+          </div>
 
+          <div class="orion-graphic-stack">
             <div class="orbit-scene">
+              <article class="day-overlay" id="dayOverlay">
+                <span class="day-badge" id="dayOverlayBadge">Flight day</span>
+                <h3 id="dayOverlayTitle">Loading current mission day...</h3>
+                <p id="dayOverlaySummary">The active flight-day summary appears here.</p>
+              </article>
+
               <div class="orbit-glow orbit-glow-earth" aria-hidden="true"></div>
               <div class="orbit-glow orbit-glow-moon" aria-hidden="true"></div>
               <div class="orbit-lane orbit-lane-outbound" aria-hidden="true"></div>
@@ -70,20 +54,55 @@
               </div>
             </div>
 
-            <div class="location-readout">
-              <div class="readout-grid">
-                <div>
-                  <span class="mini-label">Route</span>
-                  <strong id="routeLabel">Checking route...</strong>
-                </div>
-                <div>
-                  <span class="mini-label">Best estimate</span>
-                  <strong id="distanceLabel">Calculating...</strong>
-                </div>
-              </div>
-              <p id="locationNarrative" class="readout-copy">The app estimates Orion's location from NASA's published mission plan and mission timing.</p>
+            <div class="telemetry-bar" aria-label="Estimated live mission telemetry">
+              <article class="telemetry-item">
+                <span class="mini-label">Distance to Moon</span>
+                <strong id="distanceToMoonValue">Calculating...</strong>
+                <span class="telemetry-track"><span class="telemetry-fill" id="distanceToMoonFill"></span></span>
+              </article>
+              <article class="telemetry-item">
+                <span class="mini-label">Distance from Earth</span>
+                <strong id="distanceFromEarthValue">Calculating...</strong>
+                <span class="telemetry-track"><span class="telemetry-fill" id="distanceFromEarthFill"></span></span>
+              </article>
+              <article class="telemetry-item">
+                <span class="mini-label">Speed</span>
+                <strong id="speedValue">Calculating...</strong>
+                <span class="telemetry-track"><span class="telemetry-fill" id="speedFill"></span></span>
+              </article>
             </div>
-          </section>
+          </div>
+
+          <div class="location-readout">
+            <div class="readout-grid">
+              <div>
+                <span class="mini-label">Route</span>
+                <strong id="routeLabel">Checking route...</strong>
+              </div>
+              <div>
+                <span class="mini-label">Best estimate</span>
+                <strong id="distanceLabel">Calculating...</strong>
+              </div>
+            </div>
+            <p id="locationNarrative" class="readout-copy">The app estimates Orion's location from NASA's published mission plan and mission timing.</p>
+          </div>
+        </section>
+
+        <div class="hero-side">
+          <div class="hero-metrics">
+            <article class="metric">
+              <span class="label">Mission elapsed time</span>
+              <strong id="missionClock">Calculating...</strong>
+            </article>
+            <article class="metric">
+              <span class="label">Current mission phase</span>
+              <strong id="currentPhase">Working it out...</strong>
+            </article>
+            <article class="metric">
+              <span class="label">Planned mission length</span>
+              <strong>About 10 days</strong>
+            </article>
+          </div>
 
           <section class="sound-panel">
             <div class="panel-head">
@@ -112,56 +131,100 @@
         <section class="section-block crew-section">
           <div class="headline-group">
             <p class="section-kicker">On board</p>
-            <h2>Meet the Artemis II crew</h2>
-            <p class="panel-copy">Each card gives the simple family version of why that person matters on the mission.</p>
+            <h2>The crew</h2>
+            <p class="panel-copy">Official Artemis II portraits with quick family-friendly explainers for each astronaut.</p>
           </div>
           <div class="crew-grid" id="crewList"></div>
         </section>
 
-        <section class="section-block timeline-section">
-          <div class="headline-group">
-            <p class="section-kicker">Mission plan</p>
-            <h2>What is happening today?</h2>
-            <p class="panel-copy">This follows NASA's official day-by-day agenda and highlights the active part of the flight.</p>
-          </div>
-          <div class="timeline" id="timeline"></div>
-        </section>
-
         <section class="split-section">
-          <section class="section-block">
+          <section class="section-block launcher-card">
             <div class="headline-group">
-              <p class="section-kicker">Ask away</p>
-              <h2>Questions from launch night</h2>
-              <p class="panel-copy">Open any answer for the short version first, then keep the conversation going.</p>
+              <p class="section-kicker">Mission plan</p>
+              <h2>Open the full day-by-day mission timeline</h2>
+              <p class="panel-copy">The orbit overlay only shows the active flight day. Use this to reopen the full plan whenever you want.</p>
             </div>
-            <div class="qa-list" id="qaList"></div>
+            <button class="panel-button" type="button" data-open-modal="timelineModal">Open mission timeline</button>
           </section>
 
-          <section class="section-block note-section">
+          <section class="section-block launcher-card">
             <div class="headline-group">
-              <p class="section-kicker">Family note</p>
-              <h2>A little mission moment for tonight</h2>
+              <p class="section-kicker">Questions</p>
+              <h2>Open the launch-night questions</h2>
+              <p class="panel-copy">The full question list now lives in a pop-up so the main screen stays calmer on laptop and phone.</p>
             </div>
+            <button class="panel-button" type="button" data-open-modal="questionsModal">Open family questions</button>
+          </section>
+        </section>
 
-            <p class="family-note" id="familyPrompt">You were there for launch. That matters. Keep checking in each day, watch the Moon, and let the mission become part of the routine.</p>
+        <section class="section-block note-section">
+          <div class="headline-group">
+            <p class="section-kicker">Family note</p>
+            <h2>A little mission moment for tonight</h2>
+          </div>
 
-            <div class="source-callout">
-              <strong>Real-time source</strong>
-              <p>NASA's AROW tracker is still the source of truth for live position, mission duration, and Earth or Moon distance during flight.</p>
-            </div>
+          <p class="family-note" id="familyPrompt">You were there for launch. That matters. Keep checking in each day, watch the Moon, and let the mission become part of the routine.</p>
 
-            <section class="sources">
-              <h3>Sources used in this app</h3>
+          <div class="source-callout">
+            <strong>Real-time source</strong>
+            <p>NASA's AROW tracker is still the source of truth for live position, mission duration, and Earth or Moon distance during flight.</p>
+          </div>
+
+          <section class="sources">
+            <h3>Sources used in this app</h3>
               <ul>
                 <li>NASA says AROW provides real-time Artemis II tracking, including Orion's position, mission duration, and distances from Earth and Moon, starting about one minute after liftoff.</li>
                 <li>NASA's official daily agenda lays out the planned tasks for flight days 1 through 10, including proximity operations, translunar injection, trajectory correction burns, lunar flyby work, return tasks, and splashdown.</li>
                 <li>NASA's live launch updates page confirms Artemis II launched at 6:35 p.m. EDT on 1 April 2026.</li>
+                <li>Official Artemis II crew portraits come from NASA's "Our Artemis Crew" page.</li>
               </ul>
             </section>
           </section>
+
+        <section class="section-block live-section">
+          <div class="headline-group">
+            <p class="section-kicker">Live mission</p>
+            <h2>NASA live links</h2>
+            <p class="panel-copy">Use these at the bottom of the app when you want the official tracker, live updates, video, or agenda.</p>
+          </div>
+
+          <div class="button-grid">
+            <a class="action-link" href="https://www.nasa.gov/trackartemis" target="_blank" rel="noopener">Open NASA live tracker</a>
+            <a class="action-link" href="https://www.nasa.gov/blogs/missions/2026/04/01/live-artemis-ii-launch-day-updates/" target="_blank" rel="noopener">Open NASA live updates</a>
+            <a class="action-link" href="https://www.nasa.gov/live/" target="_blank" rel="noopener">Open NASA live video</a>
+            <a class="action-link" href="https://www.nasa.gov/missions/artemis/nasas-artemis-ii-moon-mission-daily-agenda/" target="_blank" rel="noopener">Open official daily agenda</a>
+          </div>
         </section>
       </main>
     </div>
+  </div>
+
+  <div class="modal" id="timelineModal" hidden>
+    <button class="modal-backdrop" type="button" data-close-modal="timelineModal" aria-label="Close mission timeline"></button>
+    <section class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="timelineModalTitle">
+      <div class="modal-head">
+        <div>
+          <p class="section-kicker">Mission plan</p>
+          <h2 id="timelineModalTitle">Mission day by day</h2>
+        </div>
+        <button class="modal-close" type="button" data-close-modal="timelineModal">Cancel</button>
+      </div>
+      <div class="timeline modal-timeline" id="timeline"></div>
+    </section>
+  </div>
+
+  <div class="modal" id="questionsModal" hidden>
+    <button class="modal-backdrop" type="button" data-close-modal="questionsModal" aria-label="Close family questions"></button>
+    <section class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="questionsModalTitle">
+      <div class="modal-head">
+        <div>
+          <p class="section-kicker">Questions</p>
+          <h2 id="questionsModalTitle">Questions from launch night</h2>
+        </div>
+        <button class="modal-close" type="button" data-close-modal="questionsModal">Cancel</button>
+      </div>
+      <div class="qa-list modal-qa" id="qaList"></div>
+    </section>
   </div>
 
   <script src="app.js"></script>

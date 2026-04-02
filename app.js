@@ -1,6 +1,36 @@
-const launchTime = new Date("2026-04-01T22:35:00Z");
-const plannedMissionHours = 240;
+const defaultLaunchTimeIso = "2026-04-01T22:35:00Z";
+const launchTimeStorageKey = "artemis-launch-time-iso";
 const soundPreferenceKey = "artemis-phase-chime-enabled";
+const earthMoonDistanceKm = 384400;
+const maxMoonPassDistanceKm = 391800;
+const maxSpeedKmH = 32000;
+const numberFormatter = new Intl.NumberFormat("en-GB");
+
+function getSavedLaunchTime() {
+  try {
+    const stored = window.localStorage.getItem(launchTimeStorageKey);
+    if (stored) {
+      const parsed = new Date(stored);
+      if (!Number.isNaN(parsed.getTime())) {
+        return parsed;
+      }
+    }
+  } catch {
+    return new Date(defaultLaunchTimeIso);
+  }
+
+  const actualLaunchTime = new Date(defaultLaunchTimeIso);
+
+  try {
+    window.localStorage.setItem(launchTimeStorageKey, actualLaunchTime.toISOString());
+  } catch {
+    return actualLaunchTime;
+  }
+
+  return actualLaunchTime;
+}
+
+const launchTime = getSavedLaunchTime();
 
 const missionDays = [
   {
@@ -80,7 +110,6 @@ const locationStates = [
     startHours: Number.NEGATIVE_INFINITY,
     endHours: 0,
     route: "Waiting for launch",
-    distance: "Still on Earth at Kennedy Space Center",
     summary: "Orion is still on the pad, ready for launch.",
     narrative: "The mission clock has not started yet, so Orion is still resting on Earth and waiting for liftoff.",
     familyPrompt: "Count down together and remember how the rocket looked on the launch pad."
@@ -89,7 +118,6 @@ const locationStates = [
     startHours: 0,
     endHours: 8,
     route: "Leaving Earth",
-    distance: "Just above Earth and still close to home",
     summary: "Orion has launched and is still near Earth while the crew settles in.",
     narrative: "This is the early mission setup window, with the spacecraft close to Earth and the crew getting organised.",
     familyPrompt: "Launch is still the big memory. Ask what the rumble and brightness felt like in person."
@@ -98,7 +126,6 @@ const locationStates = [
     startHours: 8,
     endHours: 24,
     route: "High Earth orbit",
-    distance: "Still in Earth's neighborhood",
     summary: "Orion is circling near Earth before the journey outward really gets going.",
     narrative: "The crew is checking systems, testing routines, and getting the cabin ready for the rest of the flight.",
     familyPrompt: "Look up at the night sky and imagine the crew getting their first sleep in space."
@@ -107,16 +134,14 @@ const locationStates = [
     startHours: 24,
     endHours: 96,
     route: "Outbound to the Moon",
-    distance: "Traveling farther from Earth every hour",
     summary: "Orion is on its long outbound leg between Earth and the Moon.",
-    narrative: "This part of the mission is all about long-distance travel, small correction burns, and getting ready for lunar space.",
+    narrative: "This is the long outbound stretch, with correction burns, science practice, and the Moon getting closer every day.",
     familyPrompt: "This is a good night to notice how far a small spacecraft can go with one big burn and patient navigation."
   },
   {
     startHours: 96,
     endHours: 120,
     route: "Closing on the Moon",
-    distance: "Almost in lunar space",
     summary: "Orion is nearing the Moon and preparing for the closest pass.",
     narrative: "The crew is almost there, testing gear and making sure the spacecraft is lined up for the Moon flyby.",
     familyPrompt: "Find the Moon outside if you can and imagine Orion drawing closer to it hour by hour."
@@ -125,7 +150,6 @@ const locationStates = [
     startHours: 120,
     endHours: 144,
     route: "Near the Moon",
-    distance: "At the Moon for the closest pass",
     summary: "Orion is at its most dramatic point, swinging around the Moon.",
     narrative: "This is the Moon moment: photos, observations, and the quiet stretch behind the lunar far side.",
     familyPrompt: "Moon day is the one to remember. Ask what the far side sounds like when radio goes quiet."
@@ -134,7 +158,6 @@ const locationStates = [
     startHours: 144,
     endHours: 216,
     route: "Free-return path home",
-    distance: "Heading back from the Moon toward Earth",
     summary: "Orion is now on the long return leg back home.",
     narrative: "The spacecraft has rounded the Moon and is gradually shrinking the gap back to Earth.",
     familyPrompt: "The crew is on the home stretch now. It is a good time to talk about how navigation brings people back safely."
@@ -143,7 +166,6 @@ const locationStates = [
     startHours: 216,
     endHours: 240,
     route: "Final return",
-    distance: "Racing into Earth's neighborhood for re-entry",
     summary: "Orion is back near Earth and preparing for the hottest, fastest part of the mission.",
     narrative: "Everything is turning toward re-entry, parachutes, and splashdown in the Pacific.",
     familyPrompt: "Re-entry day is a great one to talk about heat shields, parachutes, and why coming home is hard."
@@ -152,7 +174,6 @@ const locationStates = [
     startHours: 240,
     endHours: Number.POSITIVE_INFINITY,
     route: "Mission complete",
-    distance: "Back on Earth after splashdown",
     summary: "Orion has completed the planned mission and returned home.",
     narrative: "The published mission timeline is complete, so the story has moved from spaceflight to recovery and homecoming.",
     familyPrompt: "The trip is complete. Look back at the launch memory and pick your favourite part of the mission."
@@ -195,41 +216,57 @@ const crew = [
     name: "Reid Wiseman",
     role: "Commander",
     bio: "Engineer, Navy pilot, space station astronaut, and former head of NASA's astronaut office.",
-    focus: "He keeps the whole mission steady and makes the big crew calls."
+    focus: "He keeps the whole mission steady and makes the big crew calls.",
+    photo: "./images/reid-wiseman.jpg",
+    photoPosition: "center 18%"
   },
   {
     name: "Victor Glover",
     role: "Pilot",
     bio: "Engineer, naval aviator, test pilot, and veteran of Crew-1 to the International Space Station.",
-    focus: "He helps fly Orion and watches the spacecraft's systems closely."
+    focus: "He helps fly Orion and watches the spacecraft's systems closely.",
+    photo: "./images/victor-glover.jpg",
+    photoPosition: "center 18%"
   },
   {
     name: "Christina Koch",
     role: "Mission Specialist",
     bio: "Engineer, physicist, Antarctica veteran, and one of NASA's most experienced long-duration astronauts.",
-    focus: "She brings deep science and spaceflight experience to the mission."
+    focus: "She brings deep science and spaceflight experience to the mission.",
+    photo: "./images/christina-koch.jpg",
+    photoPosition: "center 18%"
   },
   {
     name: "Jeremy Hansen",
     role: "Mission Specialist",
     bio: "Canadian fighter and test pilot, astronaut, and former capcom for NASA missions.",
-    focus: "He represents Canada on the first crewed trip around the Moon in the Artemis era."
+    focus: "He represents Canada on the first crewed trip around the Moon in the Artemis era.",
+    photo: "./images/jeremy-hansen.jpg",
+    photoPosition: "center 18%"
   }
 ];
 
 const dom = {
   missionClock: document.getElementById("missionClock"),
   currentPhase: document.getElementById("currentPhase"),
-  flightDay: document.getElementById("flightDay"),
   routeLabel: document.getElementById("routeLabel"),
   distanceLabel: document.getElementById("distanceLabel"),
   locationSummary: document.getElementById("locationSummary"),
   locationNarrative: document.getElementById("locationNarrative"),
   familyPrompt: document.getElementById("familyPrompt"),
+  dayOverlayBadge: document.getElementById("dayOverlayBadge"),
+  dayOverlayTitle: document.getElementById("dayOverlayTitle"),
+  dayOverlaySummary: document.getElementById("dayOverlaySummary"),
   timeline: document.getElementById("timeline"),
   qaList: document.getElementById("qaList"),
   crewList: document.getElementById("crewList"),
   orionMarker: document.getElementById("orionMarker"),
+  distanceToMoonValue: document.getElementById("distanceToMoonValue"),
+  distanceToMoonFill: document.getElementById("distanceToMoonFill"),
+  distanceFromEarthValue: document.getElementById("distanceFromEarthValue"),
+  distanceFromEarthFill: document.getElementById("distanceFromEarthFill"),
+  speedValue: document.getElementById("speedValue"),
+  speedFill: document.getElementById("speedFill"),
   soundToggle: document.getElementById("soundToggle"),
   soundStatus: document.getElementById("soundStatus")
 };
@@ -240,6 +277,10 @@ let lastPhase = "";
 
 function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value));
+}
+
+function lerp(start, end, amount) {
+  return start + (end - start) * amount;
 }
 
 function missionHoursElapsed(now = new Date()) {
@@ -256,6 +297,14 @@ function formatElapsed(now = new Date()) {
   return `${sign}${days}d ${hours}h ${mins}m`;
 }
 
+function formatDistanceKm(value) {
+  return `${numberFormatter.format(Math.round(value))} km`;
+}
+
+function formatSpeedKmH(value) {
+  return `${numberFormatter.format(Math.round(value))} km/h`;
+}
+
 function getCurrentMissionDay(hoursElapsed) {
   if (hoursElapsed < 0) return null;
   return missionDays.find(item => hoursElapsed >= item.startHours && hoursElapsed < item.endHours) || null;
@@ -263,19 +312,83 @@ function getCurrentMissionDay(hoursElapsed) {
 
 function getCurrentPhase(hoursElapsed) {
   if (hoursElapsed < 0) return "Pre-launch";
-  const current = getCurrentMissionDay(hoursElapsed);
-  if (current) return current.title;
-  return "Mission complete";
-}
-
-function getFlightDayLabel(hoursElapsed) {
-  if (hoursElapsed < 0) return "Launch countdown";
-  const current = getCurrentMissionDay(hoursElapsed);
-  return current ? current.day : "Splashdown complete";
+  const currentDay = getCurrentMissionDay(hoursElapsed);
+  return currentDay ? currentDay.title : "Mission complete";
 }
 
 function getLocationState(hoursElapsed) {
   return locationStates.find(item => hoursElapsed >= item.startHours && hoursElapsed < item.endHours) || locationStates[locationStates.length - 1];
+}
+
+function getEstimatedTelemetry(hoursElapsed) {
+  if (hoursElapsed < 0) {
+    return {
+      distanceFromEarthKm: 0,
+      distanceToMoonKm: earthMoonDistanceKm,
+      speedKmH: 0
+    };
+  }
+
+  if (hoursElapsed <= 24) {
+    const t = hoursElapsed / 24;
+    const distanceFromEarthKm = lerp(0, 40000, t);
+    const speedKmH = lerp(28000, 7800, t);
+    return {
+      distanceFromEarthKm,
+      distanceToMoonKm: earthMoonDistanceKm - distanceFromEarthKm,
+      speedKmH
+    };
+  }
+
+  if (hoursElapsed <= 120) {
+    const t = (hoursElapsed - 24) / 96;
+    const distanceFromEarthKm = lerp(40000, 370000, t);
+    const speedKmH = lerp(8800, 5600, t);
+    return {
+      distanceFromEarthKm,
+      distanceToMoonKm: earthMoonDistanceKm - distanceFromEarthKm,
+      speedKmH
+    };
+  }
+
+  if (hoursElapsed <= 144) {
+    const t = (hoursElapsed - 120) / 24;
+    const distanceFromEarthKm = lerp(370000, maxMoonPassDistanceKm, t);
+    const speedKmH = lerp(5600, 7300, t);
+    return {
+      distanceFromEarthKm,
+      distanceToMoonKm: Math.abs(earthMoonDistanceKm - distanceFromEarthKm),
+      speedKmH
+    };
+  }
+
+  if (hoursElapsed <= 216) {
+    const t = (hoursElapsed - 144) / 72;
+    const distanceFromEarthKm = lerp(maxMoonPassDistanceKm, 40000, t);
+    const speedKmH = lerp(7300, 15000, t);
+    return {
+      distanceFromEarthKm,
+      distanceToMoonKm: Math.abs(earthMoonDistanceKm - distanceFromEarthKm),
+      speedKmH
+    };
+  }
+
+  if (hoursElapsed <= 240) {
+    const t = (hoursElapsed - 216) / 24;
+    const distanceFromEarthKm = lerp(40000, 0, t);
+    const speedKmH = lerp(15000, maxSpeedKmH, t);
+    return {
+      distanceFromEarthKm,
+      distanceToMoonKm: Math.abs(earthMoonDistanceKm - distanceFromEarthKm),
+      speedKmH
+    };
+  }
+
+  return {
+    distanceFromEarthKm: 0,
+    distanceToMoonKm: earthMoonDistanceKm,
+    speedKmH: 0
+  };
 }
 
 function getOrbitPosition(hoursElapsed) {
@@ -283,7 +396,7 @@ function getOrbitPosition(hoursElapsed) {
     return { left: "8%", top: "82%" };
   }
 
-  const clampedHours = clamp(hoursElapsed, 0, plannedMissionHours);
+  const clampedHours = clamp(hoursElapsed, 0, 240);
 
   if (clampedHours <= 120) {
     const t = clampedHours / 120;
@@ -303,6 +416,48 @@ function getOrbitPosition(hoursElapsed) {
   const left = 82 - 70 * t;
   const top = 68 + 28 * (4 * t * (1 - t));
   return { left: `${left}%`, top: `${top}%` };
+}
+
+function getOverlayCopy(hoursElapsed) {
+  const currentDay = getCurrentMissionDay(hoursElapsed);
+
+  if (currentDay) {
+    return {
+      badge: currentDay.day,
+      title: currentDay.title,
+      summary: currentDay.summary
+    };
+  }
+
+  if (hoursElapsed < 0) {
+    return {
+      badge: "Countdown",
+      title: "Waiting for launch",
+      summary: "The mission clock is set to the saved launch time and Orion is still on the ground."
+    };
+  }
+
+  return {
+    badge: "Mission complete",
+    title: "Splashdown complete",
+    summary: "The published day-by-day timeline has finished and Orion is back on Earth."
+  };
+}
+
+function getBestEstimateLabel(hoursElapsed, telemetry) {
+  if (hoursElapsed < 0) {
+    return "On the pad at Kennedy Space Center";
+  }
+
+  if (hoursElapsed > 240) {
+    return "Recovered after splashdown";
+  }
+
+  return `~${formatDistanceKm(telemetry.distanceFromEarthKm)} from Earth`;
+}
+
+function setFill(element, ratio) {
+  element.style.width = `${clamp(ratio, 0, 1) * 100}%`;
 }
 
 function renderTimeline(hoursElapsed) {
@@ -346,15 +501,6 @@ function renderQA() {
   });
 }
 
-function getInitials(name) {
-  return name
-    .split(" ")
-    .map(part => part[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
-}
-
 function renderCrew() {
   dom.crewList.innerHTML = "";
 
@@ -363,7 +509,9 @@ function renderCrew() {
     article.className = "crew-card";
     article.innerHTML = `
       <div class="crew-card-top">
-        <div class="crew-badge">${getInitials(person.name)}</div>
+        <div class="crew-photo-wrap">
+          <img class="crew-photo" src="${person.photo}" alt="${person.name}" loading="lazy" style="object-position: ${person.photoPosition};" />
+        </div>
         <div>
           <h3>${person.name}</h3>
           <p class="crew-role">${person.role}</p>
@@ -493,23 +641,75 @@ function maybePlayPhaseChime(nextPhase) {
   lastPhase = nextPhase;
 }
 
+function openModal(modalId) {
+  const modal = document.getElementById(modalId);
+  if (!modal) return;
+  modal.hidden = false;
+  document.body.classList.add("modal-open");
+}
+
+function closeModal(modalId) {
+  const modal = document.getElementById(modalId);
+  if (!modal) return;
+  modal.hidden = true;
+  const anyOpen = Array.from(document.querySelectorAll(".modal")).some(item => !item.hidden);
+  document.body.classList.toggle("modal-open", anyOpen);
+}
+
+function closeAllModals() {
+  document.querySelectorAll(".modal").forEach(modal => {
+    modal.hidden = true;
+  });
+  document.body.classList.remove("modal-open");
+}
+
+function wireModals() {
+  document.querySelectorAll("[data-open-modal]").forEach(button => {
+    button.addEventListener("click", event => {
+      openModal(event.currentTarget.getAttribute("data-open-modal"));
+    });
+  });
+
+  document.querySelectorAll("[data-close-modal]").forEach(button => {
+    button.addEventListener("click", event => {
+      closeModal(event.currentTarget.getAttribute("data-close-modal"));
+    });
+  });
+
+  document.addEventListener("keydown", event => {
+    if (event.key === "Escape") {
+      closeAllModals();
+    }
+  });
+}
+
 function updateMissionView() {
   const hoursElapsed = missionHoursElapsed();
   const currentPhase = getCurrentPhase(hoursElapsed);
-  const currentDay = getFlightDayLabel(hoursElapsed);
+  const currentDayOverlay = getOverlayCopy(hoursElapsed);
   const locationState = getLocationState(hoursElapsed);
+  const telemetry = getEstimatedTelemetry(hoursElapsed);
   const position = getOrbitPosition(hoursElapsed);
 
   dom.missionClock.textContent = formatElapsed();
   dom.currentPhase.textContent = currentPhase;
-  dom.flightDay.textContent = currentDay;
   dom.routeLabel.textContent = locationState.route;
-  dom.distanceLabel.textContent = locationState.distance;
+  dom.distanceLabel.textContent = getBestEstimateLabel(hoursElapsed, telemetry);
   dom.locationSummary.textContent = locationState.summary;
   dom.locationNarrative.textContent = locationState.narrative;
   dom.familyPrompt.textContent = locationState.familyPrompt;
+  dom.dayOverlayBadge.textContent = currentDayOverlay.badge;
+  dom.dayOverlayTitle.textContent = currentDayOverlay.title;
+  dom.dayOverlaySummary.textContent = currentDayOverlay.summary;
   dom.orionMarker.style.left = position.left;
   dom.orionMarker.style.top = position.top;
+
+  dom.distanceToMoonValue.textContent = formatDistanceKm(telemetry.distanceToMoonKm);
+  dom.distanceFromEarthValue.textContent = formatDistanceKm(telemetry.distanceFromEarthKm);
+  dom.speedValue.textContent = formatSpeedKmH(telemetry.speedKmH);
+  setFill(dom.distanceToMoonFill, telemetry.distanceToMoonKm / earthMoonDistanceKm);
+  setFill(dom.distanceFromEarthFill, telemetry.distanceFromEarthKm / maxMoonPassDistanceKm);
+  setFill(dom.speedFill, telemetry.speedKmH / maxSpeedKmH);
 
   renderTimeline(hoursElapsed);
   maybePlayPhaseChime(currentPhase);
@@ -527,6 +727,7 @@ function wireSoundButtons() {
   dom.soundStatus.textContent = dom.soundToggle.checked
     ? "Phase chimes are on after the first tap."
     : "Sound is ready when you are.";
+
   dom.soundToggle.addEventListener("change", event => {
     const enabled = event.currentTarget.checked;
     writeStoredSoundPreference(enabled);
@@ -543,6 +744,7 @@ function wireSoundButtons() {
 
 renderQA();
 renderCrew();
+wireModals();
 wireSoundButtons();
 updateMissionView();
 setInterval(updateMissionView, 30000);
