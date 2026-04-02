@@ -46,8 +46,18 @@
 
               <div class="orbit-glow orbit-glow-earth" aria-hidden="true"></div>
               <div class="orbit-glow orbit-glow-moon" aria-hidden="true"></div>
-              <div class="orbit-lane orbit-lane-outbound" aria-hidden="true"></div>
-              <div class="orbit-lane orbit-lane-return" aria-hidden="true"></div>
+              <svg class="orbit-paths" viewBox="0 0 1000 600" preserveAspectRatio="none" aria-hidden="true">
+                <path
+                  class="orbit-path orbit-path-outbound"
+                  id="orbitPathOutbound"
+                  d="M 172 493 C 92 496, 46 422, 60 357 C 72 297, 154 266, 221 292 C 290 320, 301 411, 243 474 C 186 536, 83 533, 49 456 C 9 367, 66 292, 168 261 C 325 212, 467 248, 567 331 C 635 387, 707 361, 757 278 C 799 207, 820 108, 895 84 C 955 66, 988 109, 986 168 C 984 233, 940 291, 875 294 C 815 296, 771 257, 757 278"
+                ></path>
+                <path
+                  class="orbit-path orbit-path-return"
+                  id="orbitPathReturn"
+                  d="M 757 278 C 711 214, 731 116, 805 71 C 880 26, 968 41, 988 132 C 995 216, 968 320, 866 378 C 774 430, 632 454, 523 520 C 447 560, 395 590, 344 562 C 282 527, 280 432, 337 378 C 409 310, 413 212, 360 132 C 309 57, 202 48, 131 111 C 57 177, 42 289, 76 394 C 101 470, 140 512, 172 493"
+                ></path>
+              </svg>
               <div class="planet earth"><span>Earth</span></div>
               <div class="planet moon"><span>Moon</span></div>
               <div class="orion-marker" id="orionMarker">
@@ -121,13 +131,14 @@
             <div class="panel-head">
               <p class="section-kicker">Play</p>
               <h2>Mission sounds</h2>
-              <p class="panel-copy">Tap a gentle sound cue for launch, cruise, or moon pass. Sounds stay quiet until someone taps.</p>
+              <p class="panel-copy">Tap a gentle sound cue for launch, cruise, moon pass, or re-entry. Sounds stay quiet until someone taps.</p>
             </div>
 
             <div class="sound-grid">
               <button class="sound-button" type="button" data-sound="launch">Launch pulse</button>
               <button class="sound-button" type="button" data-sound="cruise">Space hum</button>
               <button class="sound-button" type="button" data-sound="moon">Moon hello</button>
+              <button class="sound-button" type="button" data-sound="reentry">Re-entry rush</button>
             </div>
 
             <label class="sound-toggle">

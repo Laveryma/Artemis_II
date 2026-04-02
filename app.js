@@ -39,72 +39,86 @@ const missionDays = [
     startHours: 0,
     endHours: 24,
     title: "Launch, high Earth orbit, and Orion checkout",
-    summary: "Launch, upper-stage practice, early system checks, and the first sleep shift in space."
+    summary: "Launch, upper-stage practice, early system checks, and the first sleep shift in space.",
+    familyPrompt: "Retell the loudest launch moment together and ask what everyone noticed first once Orion cleared the tower."
   },
   {
     day: "Flight Day 2",
     startHours: 24,
     endHours: 48,
     title: "Workout checks and translunar injection",
-    summary: "The crew tests exercise gear and performs the major burn that sends Orion toward the Moon."
+    summary: "The crew tests exercise gear and performs the major burn that sends Orion toward the Moon.",
+    familyPrompt: "Talk about the big translunar burn and guess how small Earth would look after one powerful push away from home."
   },
   {
     day: "Flight Day 3",
     startHours: 48,
     endHours: 72,
     title: "Outbound correction and medical demonstrations",
-    summary: "A small trajectory correction burn, CPR-in-space practice, medical kit checks, and Moon observation rehearsal."
+    summary: "A small trajectory correction burn, CPR-in-space practice, medical kit checks, and Moon observation rehearsal.",
+    familyPrompt: "Try a quick pretend emergency drill with a pillow patient and talk about why crews practise helping each other far from Earth."
   },
   {
     day: "Flight Day 4",
     startHours: 72,
     endHours: 96,
     title: "More outbound refinement and Moon-target prep",
-    summary: "Another course correction, geography target review, and dedicated celestial photography time."
+    summary: "Another course correction, geography target review, and dedicated celestial photography time.",
+    familyPrompt: "Look for the Moon and imagine aiming for it without roads, signs, or straight lines, just timing and careful navigation."
   },
   {
     day: "Flight Day 5",
     startHours: 96,
     endHours: 120,
     title: "Entering the Moon's neighborhood",
-    summary: "Spacesuit testing in space and the final outbound correction before the close lunar pass."
+    summary: "Spacesuit testing in space and the final outbound correction before the close lunar pass.",
+    familyPrompt: "Suit day is a good night to ask why zips, gloves, and seals all matter more when the Moon is finally close."
   },
   {
     day: "Flight Day 6",
     startHours: 120,
     endHours: 144,
     title: "Closest approach to the Moon",
-    summary: "Photo and video work near the Moon, real-time observation logging, and a blackout while passing behind the Moon."
+    summary: "Photo and video work near the Moon, real-time observation logging, and a blackout while passing behind the Moon.",
+    familyPrompt: "Step outside, find the Moon, and imagine the quiet moment when Orion slips behind it and radio goes still."
   },
   {
     day: "Flight Day 7",
     startHours: 144,
     endHours: 168,
     title: "Leaving the Moon and starting the trip home",
-    summary: "Exit the Moon's sphere of influence, talk with scientists, complete a return correction, and rest."
+    summary: "Exit the Moon's sphere of influence, talk with scientists, complete a return correction, and rest.",
+    familyPrompt: "Talk about how the Moon can bend a spacecraft's path home, and why coming back safely is its own skill."
   },
   {
     day: "Flight Day 8",
     startHours: 168,
     endHours: 192,
     title: "Radiation shelter drill and manual piloting",
-    summary: "The crew practises building a radiation shelter and tests Orion's manual handling and attitude control."
+    summary: "The crew practises building a radiation shelter and tests Orion's manual handling and attitude control.",
+    familyPrompt: "Build a tiny blanket fort shelter and compare it with how astronauts rehearse safe places even when space looks calm."
   },
   {
     day: "Flight Day 9",
     startHours: 192,
     endHours: 216,
     title: "Return prep and fit checks",
-    summary: "The crew studies re-entry procedures, performs another return correction burn, and checks backup cabin routines."
+    summary: "The crew studies re-entry procedures, performs another return correction burn, and checks backup cabin routines.",
+    familyPrompt: "Make a simple checklist tonight and compare it with how crews prepare for re-entry with no skipped steps."
   },
   {
     day: "Flight Day 10",
     startHours: 216,
     endHours: 240,
     title: "Re-entry, parachutes, and splashdown",
-    summary: "Cabin reset, suits back on, service module separation, fiery re-entry, parachutes, and Pacific splashdown."
+    summary: "Cabin reset, suits back on, service module separation, fiery re-entry, parachutes, and Pacific splashdown.",
+    familyPrompt: "Today is splashdown day. Ask which part sounds hardest: the heat, the parachutes, or the ocean landing."
   }
 ];
+
+const prelaunchFamilyPrompt = "Count down together and remember how the rocket looked on the launch pad before Orion ever moved.";
+const postMissionFamilyPrompt = "The trip is complete. Pick your favourite family mission memory and the moment you would tell someone else about first.";
+const moonLoopReturnProgress = 0.18;
 
 const locationStates = [
   {
@@ -263,6 +277,8 @@ const dom = {
   timeline: document.getElementById("timeline"),
   qaList: document.getElementById("qaList"),
   crewList: document.getElementById("crewList"),
+  orbitPathOutbound: document.getElementById("orbitPathOutbound"),
+  orbitPathReturn: document.getElementById("orbitPathReturn"),
   orionMarker: document.getElementById("orionMarker"),
   distanceToMoonValue: document.getElementById("distanceToMoonValue"),
   distanceToMoonFill: document.getElementById("distanceToMoonFill"),
@@ -343,6 +359,20 @@ function getCurrentPhase(hoursElapsed) {
   return currentDay ? currentDay.title : "Mission complete";
 }
 
+function getFamilyPrompt(hoursElapsed) {
+  const currentDay = getCurrentMissionDay(hoursElapsed);
+
+  if (currentDay?.familyPrompt) {
+    return currentDay.familyPrompt;
+  }
+
+  if (hoursElapsed < 0) {
+    return prelaunchFamilyPrompt;
+  }
+
+  return postMissionFamilyPrompt;
+}
+
 function getLocationState(hoursElapsed) {
   return locationStates.find(item => hoursElapsed >= item.startHours && hoursElapsed < item.endHours) || locationStates[locationStates.length - 1];
 }
@@ -418,7 +448,7 @@ function getEstimatedTelemetry(hoursElapsed) {
   };
 }
 
-function getOrbitPosition(hoursElapsed) {
+function getFallbackOrbitPosition(hoursElapsed) {
   if (hoursElapsed < 0) {
     return { left: "8%", top: "82%" };
   }
@@ -443,6 +473,45 @@ function getOrbitPosition(hoursElapsed) {
   const left = 82 - 70 * t;
   const top = 68 + 28 * (4 * t * (1 - t));
   return { left: `${left}%`, top: `${top}%` };
+}
+
+function getPointAlongOrbitPath(pathElement, progress) {
+  if (!pathElement || typeof pathElement.getTotalLength !== "function") {
+    return null;
+  }
+
+  const svg = pathElement.ownerSVGElement;
+  const viewBox = svg?.viewBox?.baseVal;
+
+  if (!viewBox || !viewBox.width || !viewBox.height) {
+    return null;
+  }
+
+  const point = pathElement.getPointAtLength(pathElement.getTotalLength() * clamp(progress, 0, 1));
+  return {
+    left: `${(point.x / viewBox.width) * 100}%`,
+    top: `${(point.y / viewBox.height) * 100}%`
+  };
+}
+
+function getOrbitPosition(hoursElapsed) {
+  if (hoursElapsed < 0) {
+    return getFallbackOrbitPosition(hoursElapsed);
+  }
+
+  const clampedHours = clamp(hoursElapsed, 0, 240);
+
+  if (clampedHours <= 120) {
+    return getPointAlongOrbitPath(dom.orbitPathOutbound, clampedHours / 120) || getFallbackOrbitPosition(clampedHours);
+  }
+
+  if (clampedHours <= 144) {
+    const t = (clampedHours - 120) / 24;
+    return getPointAlongOrbitPath(dom.orbitPathReturn, lerp(0, moonLoopReturnProgress, t)) || getFallbackOrbitPosition(clampedHours);
+  }
+
+  const t = clamp((clampedHours - 144) / 96, 0, 1);
+  return getPointAlongOrbitPath(dom.orbitPathReturn, lerp(moonLoopReturnProgress, 1, t)) || getFallbackOrbitPosition(clampedHours);
 }
 
 function getOverlayCopy(hoursElapsed) {
@@ -660,6 +729,14 @@ function playMissionSound(name) {
         { type: "sine", from: 820, to: 960, duration: 0.22, volume: 0.08 }
       ]
     },
+    reentry: {
+      label: "Re-entry rush played.",
+      sequence: [
+        { type: "sawtooth", from: 280, to: 180, duration: 0.16, volume: 0.05, gap: 0.03 },
+        { type: "triangle", from: 220, to: 140, duration: 0.2, volume: 0.07, gap: 0.04 },
+        { type: "sine", from: 170, to: 90, duration: 0.24, volume: 0.06 }
+      ]
+    },
     phase: {
       label: "Phase chime played.",
       sequence: [
@@ -755,7 +832,7 @@ function updateMissionView() {
   dom.distanceLabel.textContent = getBestEstimateLabel(hoursElapsed, telemetry);
   dom.locationSummary.textContent = locationState.summary;
   dom.locationNarrative.textContent = locationState.narrative;
-  dom.familyPrompt.textContent = locationState.familyPrompt;
+  dom.familyPrompt.textContent = getFamilyPrompt(hoursElapsed);
   dom.dayOverlayBadge.textContent = currentDayOverlay.badge;
   dom.dayOverlayTitle.textContent = currentDayOverlay.title;
   dom.dayInfoBadge.textContent = currentDayOverlay.badge;

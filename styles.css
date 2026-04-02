@@ -324,10 +324,10 @@ body.modal-open {
 }
 
 .day-overlay,
+.orbit-paths,
 .orbit-glow,
 .planet,
-.orion-marker,
-.orbit-lane {
+.orion-marker {
   position: absolute;
 }
 
@@ -379,26 +379,35 @@ body.modal-open {
   background: rgba(255, 217, 124, 0.34);
 }
 
-.orbit-lane {
-  left: 12%;
-  width: 70%;
-  height: 50%;
-  border: 2px dashed rgba(255, 255, 255, 0.14);
+.orbit-paths {
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
 }
 
-.orbit-lane-outbound {
-  top: 22%;
-  border-bottom: none;
-  border-radius: 999px 999px 0 0;
+.orbit-path {
+  fill: none;
+  stroke-width: 3.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 12 10;
+  vector-effect: non-scaling-stroke;
+  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.08));
 }
 
-.orbit-lane-return {
-  top: 42%;
-  border-top: none;
-  border-radius: 0 0 999px 999px;
+.orbit-path-outbound {
+  stroke: rgba(227, 236, 251, 0.28);
+}
+
+.orbit-path-return {
+  stroke: rgba(255, 230, 168, 0.28);
 }
 
 .planet {
+  z-index: 2;
   display: grid;
   place-items: center;
   border-radius: 50%;
@@ -432,7 +441,7 @@ body.modal-open {
 .orion-marker {
   left: 10%;
   top: 80%;
-  z-index: 2;
+  z-index: 3;
   display: flex;
   align-items: center;
   gap: 8px;
