@@ -1,4 +1,5 @@
-# Artemis Family Tracker
+# Artemis II Tracker
+# family friendly, kid approved
 
 A lightweight static web app for iPhone home-screen use.
 
@@ -28,9 +29,7 @@ Because iPhone apps normally need Xcode and App Store or TestFlight signing, thi
 2. Open the hosted URL on the iPhone in Safari.
 3. Tap **Share** > **Add to Home Screen**.
 
-That makes it feel like a simple app on the phone.
-
 ## Source basis
-- NASA says AROW provides Artemis II real-time tracking via nasa.gov/trackartemis.
+- AROW provides Artemis II real-time tracking via nasa.gov/trackartemis.
 - NASA's official daily agenda provides the day-by-day mission plan.
 - NASA's live updates page confirms launch at 6:35 p.m. EDT on 1 April 2026.
