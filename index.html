@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Artemis Family Tracker</title>
+  <meta name="theme-color" content="#0b1020" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Artemis Tracker" />
+  <meta name="description" content="A family-friendly Artemis II mission tracker with live links, timeline, and answers for Hunter and Riley." />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="icon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">Artemis II</p>
+        <h1>Family Tracker</h1>
+        <p class="sub">A simple home-screen mission companion for Hunter, Riley, Pam, and Mark.</p>
+      </div>
+      <div class="hero-cards">
+        <section class="stat-card">
+          <span class="label">Mission elapsed time</span>
+          <strong id="missionClock">Calculating…</strong>
+        </section>
+        <section class="stat-card">
+          <span class="label">Current mission phase</span>
+          <strong id="currentPhase">Working it out…</strong>
+        </section>
+        <section class="stat-card">
+          <span class="label">Planned mission length</span>
+          <strong>About 10 days</strong>
+        </section>
+      </div>
+    </header>
+
+    <main>
+      <section class="panel">
+        <h2>Live mission</h2>
+        <div class="button-grid">
+          <a class="action" href="https://www.nasa.gov/trackartemis" target="_blank" rel="noopener">Open NASA live tracker</a>
+          <a class="action" href="https://www.nasa.gov/blogs/missions/2026/04/01/live-artemis-ii-launch-day-updates/" target="_blank" rel="noopener">Open NASA live updates</a>
+          <a class="action" href="https://www.nasa.gov/live/" target="_blank" rel="noopener">Open NASA live video</a>
+          <a class="action" href="https://www.nasa.gov/missions/artemis/nasas-artemis-ii-moon-mission-daily-agenda/" target="_blank" rel="noopener">Open official daily agenda</a>
+        </div>
+        <p class="hint">If the tracker will not load inside a browser tab, use the buttons above. NASA’s own AROW tracker is the source of truth during flight.</p>
+      </section>
+
+      <section class="panel">
+        <h2>Mission day by day</h2>
+        <div class="timeline" id="timeline"></div>
+      </section>
+
+      <section class="panel two-col">
+        <div>
+          <h2>Questions from launch night</h2>
+          <div class="qa-list" id="qaList"></div>
+        </div>
+        <div>
+          <h2>The crew</h2>
+          <div class="crew-list" id="crewList"></div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Tonight’s family note</h2>
+        <p class="family-note">You were there for launch. That matters. Keep checking in each day, watch the Moon, and let the mission become part of the routine.</p>
+      </section>
+
+      <section class="panel sources">
+        <h2>Sources used in this app</h2>
+        <ul>
+          <li>NASA says AROW provides real-time Artemis II tracking, including Orion’s position, mission duration, and distances from Earth and Moon, starting about one minute after liftoff.</li>
+          <li>NASA’s official daily agenda lays out the planned tasks for flight days 1 through 10, including proximity operations, translunar injection, trajectory correction burns, lunar flyby work, return tasks, and splashdown.</li>
+          <li>NASA’s live launch updates page confirms Artemis II launched at 6:35 p.m. EDT on 1 April 2026.</li>
+        </ul>
+      </section>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
