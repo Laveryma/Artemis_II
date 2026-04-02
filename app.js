@@ -230,6 +230,7 @@ const crew = [
   {
     name: "Reid Wiseman",
     role: "Commander",
+    priorDaysInSpace: 165,
     bio: "Engineer, Navy pilot, space station astronaut, and former head of NASA's astronaut office.",
     focus: "He keeps the whole mission steady and makes the big crew calls.",
     photo: "./images/reid-wiseman.jpg",
@@ -238,6 +239,7 @@ const crew = [
   {
     name: "Victor Glover",
     role: "Pilot",
+    priorDaysInSpace: 168,
     bio: "Engineer, naval aviator, test pilot, and veteran of Crew-1 to the International Space Station.",
     focus: "He helps fly Orion and watches the spacecraft's systems closely.",
     photo: "./images/victor-glover.jpg",
@@ -246,6 +248,7 @@ const crew = [
   {
     name: "Christina Koch",
     role: "Mission Specialist",
+    priorDaysInSpace: 328,
     bio: "Engineer, physicist, Antarctica veteran, and one of NASA's most experienced long-duration astronauts.",
     focus: "She brings deep science and spaceflight experience to the mission.",
     photo: "./images/christina-koch.jpg",
@@ -254,6 +257,7 @@ const crew = [
   {
     name: "Jeremy Hansen",
     role: "Mission Specialist",
+    priorDaysInSpace: 0,
     bio: "Canadian fighter and test pilot, astronaut, and former capcom for NASA missions.",
     focus: "He represents Canada on the first crewed trip around the Moon in the Artemis era.",
     photo: "./images/jeremy-hansen.jpg",
@@ -271,6 +275,7 @@ const dom = {
   locationNarrative: document.getElementById("locationNarrative"),
   familyPrompt: document.getElementById("familyPrompt"),
   liveStatusDot: document.getElementById("liveStatusDot"),
+  crewModal: document.getElementById("crewModal"),
   dayOverlayButton: document.getElementById("dayOverlayButton"),
   dayOverlayBadge: document.getElementById("dayOverlayBadge"),
   dayOverlayTitle: document.getElementById("dayOverlayTitle"),
@@ -295,6 +300,7 @@ const dom = {
   dayInfoText: document.getElementById("dayInfoText"),
   crewModalName: document.getElementById("crewModalName"),
   crewModalRole: document.getElementById("crewModalRole"),
+  crewModalDaysValue: document.getElementById("crewModalDaysValue"),
   crewModalPhoto: document.getElementById("crewModalPhoto"),
   crewModalBio: document.getElementById("crewModalBio"),
   crewModalFocus: document.getElementById("crewModalFocus")
@@ -334,9 +340,18 @@ function formatSpeedKmH(value) {
   return `${numberFormatter.format(Math.round(value))} km/h`;
 }
 
+function formatCrewDays(value) {
+  return numberFormatter.format(value);
+}
+
 function getCurrentMissionDay(hoursElapsed) {
   if (hoursElapsed < 0) return null;
   return missionDays.find(item => hoursElapsed >= item.startHours && hoursElapsed < item.endHours) || null;
+}
+
+function getCompletedMissionDays(hoursElapsed) {
+  if (hoursElapsed < 0) return 0;
+  return clamp(Math.floor(hoursElapsed / 24), 0, totalMissionDays);
 }
 
 function getCurrentMissionDayNumber(hoursElapsed) {
@@ -357,6 +372,20 @@ function getCurrentPhase(hoursElapsed) {
   if (hoursElapsed < 0) return "Pre-launch";
   const currentDay = getCurrentMissionDay(hoursElapsed);
   return currentDay ? currentDay.title : "Mission complete";
+}
+
+function getCrewDaysInSpace(person, hoursElapsed) {
+  return person.priorDaysInSpace + getCompletedMissionDays(hoursElapsed);
+}
+
+function isIPhoneHomeApp() {
+  const userAgent = navigator.userAgent || "";
+  const standalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+  return /iPhone/i.test(userAgent) && standalone;
+}
+
+function applyPlatformClasses() {
+  document.body.classList.toggle("ios-home-app", isIPhoneHomeApp());
 }
 
 function getFamilyPrompt(hoursElapsed) {
@@ -600,22 +629,26 @@ function renderQA() {
 function openCrewModal(index) {
   const person = crew[index];
   if (!person) return;
+  const hoursElapsed = missionHoursElapsed();
 
   dom.crewModalName.textContent = person.name;
   dom.crewModalRole.textContent = person.role;
+  dom.crewModalDaysValue.textContent = formatCrewDays(getCrewDaysInSpace(person, hoursElapsed));
   dom.crewModalBio.textContent = person.bio;
   dom.crewModalFocus.textContent = person.focus;
   dom.crewModalPhoto.src = person.photo;
   dom.crewModalPhoto.alt = person.name;
   dom.crewModalPhoto.style.objectPosition = person.photoPosition;
+  dom.crewModal.dataset.crewIndex = String(index);
 
   openModal("crewModal");
 }
 
-function renderCrew() {
+function renderCrew(hoursElapsed = missionHoursElapsed()) {
   dom.crewList.innerHTML = "";
 
   crew.forEach((person, index) => {
+    const totalDaysInSpace = getCrewDaysInSpace(person, hoursElapsed);
     const button = document.createElement("button");
     button.className = "crew-card crew-button";
     button.type = "button";
@@ -625,9 +658,13 @@ function renderCrew() {
         <div class="crew-photo-wrap">
           <img class="crew-photo" src="${person.photo}" alt="${person.name}" loading="lazy" style="object-position: ${person.photoPosition};" />
         </div>
-        <div>
+        <div class="crew-meta">
           <h3>${person.name}</h3>
           <p class="crew-role">${person.role}</p>
+          <div class="crew-days-block">
+            <span class="crew-days-label">Days in space</span>
+            <strong class="crew-days-value">${formatCrewDays(totalDaysInSpace)}</strong>
+          </div>
         </div>
       </div>
       <p class="crew-bio">${person.bio}</p>
@@ -643,6 +680,24 @@ function renderCrew() {
 
     dom.crewList.appendChild(button);
   });
+}
+
+function updateCrewDayDisplays(hoursElapsed) {
+  document.querySelectorAll("[data-crew-index]").forEach(button => {
+    const index = Number(button.getAttribute("data-crew-index"));
+    const person = crew[index];
+    const value = button.querySelector(".crew-days-value");
+
+    if (!person || !value) return;
+    value.textContent = formatCrewDays(getCrewDaysInSpace(person, hoursElapsed));
+  });
+
+  const activeIndex = Number(dom.crewModal.dataset.crewIndex);
+  const activePerson = crew[activeIndex];
+
+  if (!Number.isNaN(activeIndex) && activePerson && dom.crewModalDaysValue) {
+    dom.crewModalDaysValue.textContent = formatCrewDays(getCrewDaysInSpace(activePerson, hoursElapsed));
+  }
 }
 
 function readStoredSoundPreference() {
@@ -850,6 +905,7 @@ function updateMissionView() {
   setFill(dom.distanceFromEarthFill, telemetry.distanceFromEarthKm / maxMoonPassDistanceKm);
   setFill(dom.speedFill, telemetry.speedKmH / maxSpeedKmH);
 
+  updateCrewDayDisplays(hoursElapsed);
   renderTimeline(hoursElapsed);
   maybePlayPhaseChime(currentPhase);
 }
@@ -916,6 +972,7 @@ function wireSettings() {
   });
 }
 
+applyPlatformClasses();
 renderQA();
 renderCrew();
 wireModals();

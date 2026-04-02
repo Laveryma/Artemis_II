@@ -25,14 +25,14 @@
           <p class="eyebrow">Artemis II family tracker v2</p>
           <h1>Follow Orion together.</h1>
           <p class="sub">A warmer little mission app for checking in at breakfast, after school, or right before bed.</p>
+          <div class="live-kicker-row hero-live-status">
+            <span class="live-status-dot" id="liveStatusDot" aria-hidden="true"></span>
+            <p class="section-kicker">Live now</p>
+          </div>
         </div>
 
         <section class="orion-panel">
           <div class="panel-head">
-            <div class="live-kicker-row">
-              <span class="live-status-dot" id="liveStatusDot" aria-hidden="true"></span>
-              <p class="section-kicker">Live now</p>
-            </div>
             <h2>Where is Orion now?</h2>
             <p id="locationSummary" class="panel-copy">Best estimate from NASA's day-by-day plan. Use NASA's live tracker for the exact spacecraft position.</p>
           </div>
@@ -210,6 +210,7 @@
             <p class="settings-status" id="settingsStatus">This clears saved cached files for this app and reloads the latest version.</p>
           </div>
         </details>
+        <p class="copyright">&copy; Mark Lavery 2026</p>
       </footer>
     </div>
   </div>
@@ -272,6 +273,10 @@
         </div>
         <div class="crew-modal-copy">
           <p class="crew-role" id="crewModalRole">Role</p>
+          <div class="crew-days-block crew-days-block-modal">
+            <span class="crew-days-label">Days in space</span>
+            <strong class="crew-days-value" id="crewModalDaysValue">0</strong>
+          </div>
           <p class="crew-bio" id="crewModalBio">Bio</p>
           <div class="crew-foot">
             <span class="crew-tag">Why they matter</span>
