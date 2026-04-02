@@ -4,6 +4,7 @@ const soundPreferenceKey = "artemis-phase-chime-enabled";
 const earthMoonDistanceKm = 384400;
 const maxMoonPassDistanceKm = 391800;
 const maxSpeedKmH = 32000;
+const totalMissionDays = 10;
 const numberFormatter = new Intl.NumberFormat("en-GB");
 
 function getSavedLaunchTime() {
@@ -249,14 +250,16 @@ const crew = [
 const dom = {
   missionClock: document.getElementById("missionClock"),
   currentPhase: document.getElementById("currentPhase"),
+  missionDayCounter: document.getElementById("missionDayCounter"),
   routeLabel: document.getElementById("routeLabel"),
   distanceLabel: document.getElementById("distanceLabel"),
   locationSummary: document.getElementById("locationSummary"),
   locationNarrative: document.getElementById("locationNarrative"),
   familyPrompt: document.getElementById("familyPrompt"),
+  liveStatusDot: document.getElementById("liveStatusDot"),
+  dayOverlayButton: document.getElementById("dayOverlayButton"),
   dayOverlayBadge: document.getElementById("dayOverlayBadge"),
   dayOverlayTitle: document.getElementById("dayOverlayTitle"),
-  dayOverlaySummary: document.getElementById("dayOverlaySummary"),
   timeline: document.getElementById("timeline"),
   qaList: document.getElementById("qaList"),
   crewList: document.getElementById("crewList"),
@@ -270,7 +273,15 @@ const dom = {
   soundToggle: document.getElementById("soundToggle"),
   soundStatus: document.getElementById("soundStatus"),
   resetServiceWorkerButton: document.getElementById("resetServiceWorkerButton"),
-  settingsStatus: document.getElementById("settingsStatus")
+  settingsStatus: document.getElementById("settingsStatus"),
+  dayInfoBadge: document.getElementById("dayInfoBadge"),
+  dayInfoTitle: document.getElementById("dayInfoModalTitle"),
+  dayInfoText: document.getElementById("dayInfoText"),
+  crewModalName: document.getElementById("crewModalName"),
+  crewModalRole: document.getElementById("crewModalRole"),
+  crewModalPhoto: document.getElementById("crewModalPhoto"),
+  crewModalBio: document.getElementById("crewModalBio"),
+  crewModalFocus: document.getElementById("crewModalFocus")
 };
 
 const AudioContextClass = window.AudioContext || window.webkitAudioContext;
@@ -310,6 +321,20 @@ function formatSpeedKmH(value) {
 function getCurrentMissionDay(hoursElapsed) {
   if (hoursElapsed < 0) return null;
   return missionDays.find(item => hoursElapsed >= item.startHours && hoursElapsed < item.endHours) || null;
+}
+
+function getCurrentMissionDayNumber(hoursElapsed) {
+  const currentDay = getCurrentMissionDay(hoursElapsed);
+
+  if (currentDay) {
+    return missionDays.indexOf(currentDay) + 1;
+  }
+
+  if (hoursElapsed >= 240) {
+    return totalMissionDays;
+  }
+
+  return 0;
 }
 
 function getCurrentPhase(hoursElapsed) {
@@ -503,13 +528,30 @@ function renderQA() {
   });
 }
 
+function openCrewModal(index) {
+  const person = crew[index];
+  if (!person) return;
+
+  dom.crewModalName.textContent = person.name;
+  dom.crewModalRole.textContent = person.role;
+  dom.crewModalBio.textContent = person.bio;
+  dom.crewModalFocus.textContent = person.focus;
+  dom.crewModalPhoto.src = person.photo;
+  dom.crewModalPhoto.alt = person.name;
+  dom.crewModalPhoto.style.objectPosition = person.photoPosition;
+
+  openModal("crewModal");
+}
+
 function renderCrew() {
   dom.crewList.innerHTML = "";
 
-  crew.forEach(person => {
-    const article = document.createElement("article");
-    article.className = "crew-card";
-    article.innerHTML = `
+  crew.forEach((person, index) => {
+    const button = document.createElement("button");
+    button.className = "crew-card crew-button";
+    button.type = "button";
+    button.setAttribute("data-crew-index", String(index));
+    button.innerHTML = `
       <div class="crew-card-top">
         <div class="crew-photo-wrap">
           <img class="crew-photo" src="${person.photo}" alt="${person.name}" loading="lazy" style="object-position: ${person.photoPosition};" />
@@ -525,7 +567,12 @@ function renderCrew() {
         <p class="crew-focus">${person.focus}</p>
       </div>
     `;
-    dom.crewList.appendChild(article);
+
+    button.addEventListener("click", () => {
+      openCrewModal(index);
+    });
+
+    dom.crewList.appendChild(button);
   });
 }
 
@@ -678,6 +725,12 @@ function wireModals() {
     });
   });
 
+  if (dom.dayOverlayButton) {
+    dom.dayOverlayButton.addEventListener("click", () => {
+      openModal("dayInfoModal");
+    });
+  }
+
   document.addEventListener("keydown", event => {
     if (event.key === "Escape") {
       closeAllModals();
@@ -688,13 +741,16 @@ function wireModals() {
 function updateMissionView() {
   const hoursElapsed = missionHoursElapsed();
   const currentPhase = getCurrentPhase(hoursElapsed);
+  const currentMissionDayNumber = getCurrentMissionDayNumber(hoursElapsed);
   const currentDayOverlay = getOverlayCopy(hoursElapsed);
   const locationState = getLocationState(hoursElapsed);
   const telemetry = getEstimatedTelemetry(hoursElapsed);
   const position = getOrbitPosition(hoursElapsed);
+  const liveNow = hoursElapsed >= 0 && hoursElapsed < 240;
 
   dom.missionClock.textContent = formatElapsed();
   dom.currentPhase.textContent = currentPhase;
+  dom.missionDayCounter.textContent = `${currentMissionDayNumber} of ${totalMissionDays}`;
   dom.routeLabel.textContent = locationState.route;
   dom.distanceLabel.textContent = getBestEstimateLabel(hoursElapsed, telemetry);
   dom.locationSummary.textContent = locationState.summary;
@@ -702,9 +758,13 @@ function updateMissionView() {
   dom.familyPrompt.textContent = locationState.familyPrompt;
   dom.dayOverlayBadge.textContent = currentDayOverlay.badge;
   dom.dayOverlayTitle.textContent = currentDayOverlay.title;
-  dom.dayOverlaySummary.textContent = currentDayOverlay.summary;
+  dom.dayInfoBadge.textContent = currentDayOverlay.badge;
+  dom.dayInfoTitle.textContent = currentDayOverlay.title;
+  dom.dayInfoText.textContent = currentDayOverlay.summary;
   dom.orionMarker.style.left = position.left;
   dom.orionMarker.style.top = position.top;
+  dom.liveStatusDot.classList.toggle("is-live", liveNow);
+  dom.liveStatusDot.classList.toggle("is-idle", !liveNow);
 
   dom.distanceToMoonValue.textContent = formatDistanceKm(telemetry.distanceToMoonKm);
   dom.distanceFromEarthValue.textContent = formatDistanceKm(telemetry.distanceFromEarthKm);

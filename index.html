@@ -29,18 +29,20 @@
 
         <section class="orion-panel">
           <div class="panel-head">
-            <p class="section-kicker">Live now</p>
+            <div class="live-kicker-row">
+              <span class="live-status-dot" id="liveStatusDot" aria-hidden="true"></span>
+              <p class="section-kicker">Live now</p>
+            </div>
             <h2>Where is Orion now?</h2>
             <p id="locationSummary" class="panel-copy">Best estimate from NASA's day-by-day plan. Use NASA's live tracker for the exact spacecraft position.</p>
           </div>
 
           <div class="orion-graphic-stack">
             <div class="orbit-scene">
-              <article class="day-overlay" id="dayOverlay">
+              <button class="day-overlay day-overlay-button" id="dayOverlayButton" type="button">
                 <span class="day-badge" id="dayOverlayBadge">Flight day</span>
                 <h3 id="dayOverlayTitle">Loading current mission day...</h3>
-                <p id="dayOverlaySummary">The active flight-day summary appears here.</p>
-              </article>
+              </button>
 
               <div class="orbit-glow orbit-glow-earth" aria-hidden="true"></div>
               <div class="orbit-glow orbit-glow-moon" aria-hidden="true"></div>
@@ -85,6 +87,11 @@
               </div>
             </div>
             <p id="locationNarrative" class="readout-copy">The app estimates Orion's location from NASA's published mission plan and mission timing.</p>
+
+            <div class="live-area-actions">
+              <button class="panel-button" type="button" data-open-modal="timelineModal">Mission timeline</button>
+              <button class="panel-button" type="button" data-open-modal="questionsModal">Launch day Q&amp;A</button>
+            </div>
           </div>
         </section>
 
@@ -99,8 +106,8 @@
               <strong id="currentPhase">Working it out...</strong>
             </article>
             <article class="metric">
-              <span class="label">Planned mission length</span>
-              <strong>About 10 days</strong>
+              <span class="label">Mission day</span>
+              <strong id="missionDayCounter">0 of 10</strong>
             </article>
           </div>
 
@@ -137,26 +144,6 @@
           <div class="crew-grid" id="crewList"></div>
         </section>
 
-        <section class="split-section">
-          <section class="section-block launcher-card">
-            <div class="headline-group">
-              <p class="section-kicker">Mission plan</p>
-              <h2>Open the full day-by-day mission timeline</h2>
-              <p class="panel-copy">The orbit overlay only shows the active flight day. Use this to reopen the full plan whenever you want.</p>
-            </div>
-            <button class="panel-button" type="button" data-open-modal="timelineModal">Open mission timeline</button>
-          </section>
-
-          <section class="section-block launcher-card">
-            <div class="headline-group">
-              <p class="section-kicker">Questions</p>
-              <h2>Open the launch-night questions</h2>
-              <p class="panel-copy">The full question list now lives in a pop-up so the main screen stays calmer on laptop and phone.</p>
-            </div>
-            <button class="panel-button" type="button" data-open-modal="questionsModal">Open family questions</button>
-          </section>
-        </section>
-
         <section class="section-block note-section">
           <div class="headline-group">
             <p class="section-kicker">Family note</p>
@@ -172,14 +159,14 @@
 
           <section class="sources">
             <h3>Sources used in this app</h3>
-              <ul>
-                <li>NASA says AROW provides real-time Artemis II tracking, including Orion's position, mission duration, and distances from Earth and Moon, starting about one minute after liftoff.</li>
-                <li>NASA's official daily agenda lays out the planned tasks for flight days 1 through 10, including proximity operations, translunar injection, trajectory correction burns, lunar flyby work, return tasks, and splashdown.</li>
-                <li>NASA's live launch updates page confirms Artemis II launched at 6:35 p.m. EDT on 1 April 2026.</li>
-                <li>Official Artemis II crew portraits come from NASA's "Our Artemis Crew" page.</li>
-              </ul>
-            </section>
+            <ul>
+              <li>NASA says AROW provides real-time Artemis II tracking, including Orion's position, mission duration, and distances from Earth and Moon, starting about one minute after liftoff.</li>
+              <li>NASA's official daily agenda lays out the planned tasks for flight days 1 through 10, including proximity operations, translunar injection, trajectory correction burns, lunar flyby work, return tasks, and splashdown.</li>
+              <li>NASA's live launch updates page confirms Artemis II launched at 6:35 p.m. EDT on 1 April 2026.</li>
+              <li>Official Artemis II crew portraits come from NASA's "Our Artemis Crew" page.</li>
+            </ul>
           </section>
+        </section>
 
         <section class="section-block live-section">
           <div class="headline-group">
@@ -235,6 +222,46 @@
         <button class="modal-close" type="button" data-close-modal="questionsModal">Cancel</button>
       </div>
       <div class="qa-list modal-qa" id="qaList"></div>
+    </section>
+  </div>
+
+  <div class="modal modal-soft" id="dayInfoModal" hidden>
+    <button class="modal-backdrop modal-backdrop-soft" type="button" data-close-modal="dayInfoModal" aria-label="Close current day details"></button>
+    <section class="modal-dialog modal-dialog-soft" role="dialog" aria-modal="true" aria-labelledby="dayInfoModalTitle">
+      <div class="modal-head modal-head-soft">
+        <div>
+          <span class="day-badge" id="dayInfoBadge">Flight day</span>
+          <h2 id="dayInfoModalTitle">Current mission day</h2>
+        </div>
+        <button class="modal-close" type="button" data-close-modal="dayInfoModal">Dismiss</button>
+      </div>
+      <p class="modal-soft-copy" id="dayInfoText">The active flight-day description appears here.</p>
+    </section>
+  </div>
+
+  <div class="modal" id="crewModal" hidden>
+    <button class="modal-backdrop" type="button" data-close-modal="crewModal" aria-label="Close crew details"></button>
+    <section class="modal-dialog crew-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="crewModalName">
+      <div class="modal-head">
+        <div>
+          <p class="section-kicker">The crew</p>
+          <h2 id="crewModalName">Astronaut</h2>
+        </div>
+        <button class="modal-close" type="button" data-close-modal="crewModal">Dismiss</button>
+      </div>
+      <div class="crew-modal-body">
+        <div class="crew-modal-photo-wrap">
+          <img class="crew-modal-photo" id="crewModalPhoto" alt="" />
+        </div>
+        <div class="crew-modal-copy">
+          <p class="crew-role" id="crewModalRole">Role</p>
+          <p class="crew-bio" id="crewModalBio">Bio</p>
+          <div class="crew-foot">
+            <span class="crew-tag">Why they matter</span>
+            <p class="crew-focus" id="crewModalFocus">Focus</p>
+          </div>
+        </div>
+      </div>
     </section>
   </div>
 
