@@ -300,6 +300,8 @@ const dom = {
   dayInfoBadge: document.getElementById("dayInfoBadge"),
   dayInfoTitle: document.getElementById("dayInfoModalTitle"),
   dayInfoText: document.getElementById("dayInfoText"),
+  kidPhotoModalTitle: document.getElementById("kidPhotoModalTitle"),
+  kidPhotoModalImage: document.getElementById("kidPhotoModalImage"),
   crewModalName: document.getElementById("crewModalName"),
   crewModalRole: document.getElementById("crewModalRole"),
   crewModalDaysValue: document.getElementById("crewModalDaysValue"),
@@ -846,10 +848,29 @@ function closeAllModals() {
   document.body.classList.remove("modal-open");
 }
 
+function openKidPhotoModal(button) {
+  const title = button.getAttribute("data-kid-photo-title");
+  const src = button.getAttribute("data-kid-photo-src");
+  const alt = button.getAttribute("data-kid-photo-alt") || title || "";
+
+  if (!title || !src) return;
+
+  dom.kidPhotoModalTitle.textContent = title;
+  dom.kidPhotoModalImage.src = src;
+  dom.kidPhotoModalImage.alt = alt;
+  openModal("kidPhotoModal");
+}
+
 function wireModals() {
   document.querySelectorAll("[data-open-modal]").forEach(button => {
     button.addEventListener("click", event => {
       openModal(event.currentTarget.getAttribute("data-open-modal"));
+    });
+  });
+
+  document.querySelectorAll("[data-kid-photo-title]").forEach(button => {
+    button.addEventListener("click", event => {
+      openKidPhotoModal(event.currentTarget);
     });
   });
 

@@ -115,6 +115,24 @@
 
               <div class="live-area-actions">
                 <button class="panel-button" type="button" data-open-modal="timelineModal">Mission timeline</button>
+                <button
+                  class="panel-button"
+                  type="button"
+                  data-kid-photo-title="Astronaut Hunter"
+                  data-kid-photo-src="./images/astro-hunter.png"
+                  data-kid-photo-alt="Hunter in an astronaut suit"
+                >
+                  Astronaut Hunter
+                </button>
+                <button
+                  class="panel-button"
+                  type="button"
+                  data-kid-photo-title="Astronaut Riley"
+                  data-kid-photo-src="./images/astro-riley.png"
+                  data-kid-photo-alt="Riley in an astronaut suit"
+                >
+                  Astronaut Riley
+                </button>
                 <button class="panel-button" type="button" data-open-modal="questionsModal">Launch day Q&amp;A</button>
               </div>
             </section>
@@ -264,6 +282,22 @@
         <button class="modal-close" type="button" data-close-modal="dayInfoModal">Dismiss</button>
       </div>
       <p class="modal-soft-copy" id="dayInfoText">The active flight-day description appears here.</p>
+    </section>
+  </div>
+
+  <div class="modal modal-soft" id="kidPhotoModal" hidden>
+    <button class="modal-backdrop modal-backdrop-soft" type="button" data-close-modal="kidPhotoModal" aria-label="Close family astronaut photo"></button>
+    <section class="modal-dialog modal-dialog-soft kid-photo-dialog" role="dialog" aria-modal="true" aria-labelledby="kidPhotoModalTitle">
+      <div class="modal-head modal-head-soft">
+        <div>
+          <p class="section-kicker">Family crew</p>
+          <h2 id="kidPhotoModalTitle">Astronaut</h2>
+        </div>
+        <button class="modal-close" type="button" data-close-modal="kidPhotoModal">Dismiss</button>
+      </div>
+      <div class="kid-photo-frame">
+        <img class="kid-photo-image" id="kidPhotoModalImage" alt="" />
+      </div>
     </section>
   </div>
 

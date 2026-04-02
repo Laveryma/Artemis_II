@@ -1,4 +1,4 @@
-const CACHE_NAME = "artemis-family-tracker-v10";
+const CACHE_NAME = "artemis-family-tracker-v11";
 const ASSETS = [
   "./",
   "./index.html",
@@ -9,7 +9,9 @@ const ASSETS = [
   "./images/reid-wiseman.jpg",
   "./images/victor-glover.jpg",
   "./images/christina-koch.jpg",
-  "./images/jeremy-hansen.jpg"
+  "./images/jeremy-hansen.jpg",
+  "./images/astro-hunter.png",
+  "./images/astro-riley.png"
 ];
 
 self.addEventListener("install", event => {
