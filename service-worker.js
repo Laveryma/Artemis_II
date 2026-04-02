@@ -1,4 +1,4 @@
-const CACHE_NAME = "artemis-family-tracker-v4";
+const CACHE_NAME = "artemis-family-tracker-v5";
 const ASSETS = [
   "./",
   "./index.html",

@@ -268,7 +268,9 @@ const dom = {
   speedValue: document.getElementById("speedValue"),
   speedFill: document.getElementById("speedFill"),
   soundToggle: document.getElementById("soundToggle"),
-  soundStatus: document.getElementById("soundStatus")
+  soundStatus: document.getElementById("soundStatus"),
+  resetServiceWorkerButton: document.getElementById("resetServiceWorkerButton"),
+  settingsStatus: document.getElementById("settingsStatus")
 };
 
 const AudioContextClass = window.AudioContext || window.webkitAudioContext;
@@ -742,10 +744,46 @@ function wireSoundButtons() {
   });
 }
 
+async function redownloadServiceWorker() {
+  if (!("serviceWorker" in navigator)) {
+    dom.settingsStatus.textContent = "This browser does not support service workers.";
+    return;
+  }
+
+  dom.resetServiceWorkerButton.disabled = true;
+  dom.settingsStatus.textContent = "Clearing the saved app version and fetching a fresh copy...";
+
+  try {
+    const registrations = await navigator.serviceWorker.getRegistrations();
+    await Promise.all(registrations.map(registration => registration.unregister()));
+
+    if ("caches" in window) {
+      const cacheKeys = await caches.keys();
+      await Promise.all(cacheKeys.map(key => caches.delete(key)));
+    }
+
+    await fetch(`./service-worker.js?refresh=${Date.now()}`, { cache: "no-store" });
+    dom.settingsStatus.textContent = "Fresh service worker requested. Reloading now...";
+    window.location.replace(`./?refresh=${Date.now()}`);
+  } catch {
+    dom.resetServiceWorkerButton.disabled = false;
+    dom.settingsStatus.textContent = "Could not redownload the service worker. Try again in a moment.";
+  }
+}
+
+function wireSettings() {
+  if (!dom.resetServiceWorkerButton) return;
+
+  dom.resetServiceWorkerButton.addEventListener("click", () => {
+    redownloadServiceWorker();
+  });
+}
+
 renderQA();
 renderCrew();
 wireModals();
 wireSoundButtons();
+wireSettings();
 updateMissionView();
 setInterval(updateMissionView, 30000);
 
