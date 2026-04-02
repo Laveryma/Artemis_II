@@ -3,8 +3,11 @@
 A lightweight static web app for iPhone home-screen use.
 
 ## What it does
-- Shows mission elapsed time from Artemis II launch
-- Estimates the current flight day/phase from NASA's published daily agenda
+- Shows mission elapsed time from the Artemis II launch
+- Estimates the current flight day and mission phase from NASA's published daily agenda
+- Shows a "Where is Orion now?" panel based on the published mission plan
+- Includes gentle mission sound buttons and optional phase-change chimes
+- Presents the crew as quick family-friendly cards
 - Opens NASA's live Artemis tracker, live updates, and live video
 - Includes simple family-friendly answers to the questions asked on launch night
 
