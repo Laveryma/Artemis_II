@@ -25,6 +25,16 @@
           <p class="eyebrow">Artemis II family tracker v2</p>
           <h1>Follow Orion together.</h1>
           <p class="sub">A warmer little mission app for checking in at breakfast, after school, or right before bed.</p>
+          <div class="ios-mission-strip" aria-label="Mission quick stats">
+            <article class="metric metric-compact">
+              <span class="label">Mission elapsed time</span>
+              <strong id="missionClockCompact">Calculating...</strong>
+            </article>
+            <article class="metric metric-compact">
+              <span class="label">Mission day</span>
+              <strong id="missionDayCounterCompact">0 of 10</strong>
+            </article>
+          </div>
           <div class="live-kicker-row hero-live-status">
             <span class="live-status-dot" id="liveStatusDot" aria-hidden="true"></span>
             <p class="section-kicker">Live now</p>
@@ -113,15 +123,15 @@
 
         <div class="hero-side">
           <div class="hero-metrics">
-            <article class="metric">
+            <article class="metric metric-clock-card">
               <span class="label">Mission elapsed time</span>
               <strong id="missionClock">Calculating...</strong>
             </article>
-            <article class="metric">
+            <article class="metric metric-phase-card">
               <span class="label">Current mission phase</span>
               <strong id="currentPhase">Working it out...</strong>
             </article>
-            <article class="metric">
+            <article class="metric metric-day-card">
               <span class="label">Mission day</span>
               <strong id="missionDayCounter">0 of 10</strong>
             </article>

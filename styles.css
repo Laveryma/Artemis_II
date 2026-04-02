@@ -202,6 +202,10 @@ body.modal-open {
   box-shadow: inset 0 0 0 1px rgba(121, 224, 209, 0.12);
 }
 
+.ios-mission-strip {
+  display: none;
+}
+
 .hero-metrics,
 .readout-grid,
 .sound-grid,
@@ -251,6 +255,14 @@ body.modal-open {
 
 .metric {
   padding: 16px;
+}
+
+.metric-compact {
+  min-width: 0;
+}
+
+.metric-compact strong {
+  font-size: 1.08rem;
 }
 
 .label,
@@ -1130,6 +1142,22 @@ body.modal-open {
 @media (max-width: 640px) {
   .hero h1 {
     max-width: 10ch;
+  }
+
+  body.ios-home-app .ios-mission-strip {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 18px;
+  }
+
+  body.ios-home-app .hero-live-status {
+    margin-top: 14px;
+  }
+
+  body.ios-home-app .metric-clock-card,
+  body.ios-home-app .metric-day-card {
+    display: none;
   }
 
   body.ios-home-app .orion-graphic-stack {

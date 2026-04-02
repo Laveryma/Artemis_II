@@ -267,8 +267,10 @@ const crew = [
 
 const dom = {
   missionClock: document.getElementById("missionClock"),
+  missionClockCompact: document.getElementById("missionClockCompact"),
   currentPhase: document.getElementById("currentPhase"),
   missionDayCounter: document.getElementById("missionDayCounter"),
+  missionDayCounterCompact: document.getElementById("missionDayCounterCompact"),
   routeLabel: document.getElementById("routeLabel"),
   distanceLabel: document.getElementById("distanceLabel"),
   locationSummary: document.getElementById("locationSummary"),
@@ -881,8 +883,10 @@ function updateMissionView() {
   const liveNow = hoursElapsed >= 0 && hoursElapsed < 240;
 
   dom.missionClock.textContent = formatElapsed();
+  dom.missionClockCompact.textContent = formatElapsed();
   dom.currentPhase.textContent = currentPhase;
   dom.missionDayCounter.textContent = `${currentMissionDayNumber} of ${totalMissionDays}`;
+  dom.missionDayCounterCompact.textContent = `${currentMissionDayNumber} of ${totalMissionDays}`;
   dom.routeLabel.textContent = locationState.route;
   dom.distanceLabel.textContent = getBestEstimateLabel(hoursElapsed, telemetry);
   dom.locationSummary.textContent = locationState.summary;
