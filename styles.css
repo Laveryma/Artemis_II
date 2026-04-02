@@ -208,6 +208,7 @@ body.modal-open {
 .metric,
 .orion-panel,
 .sound-panel,
+.info-inlay,
 .crew-card,
 .timeline-item,
 .qa-item,
@@ -217,6 +218,7 @@ body.modal-open {
 
 .metric,
 .sound-panel,
+.info-inlay,
 .crew-card,
 .timeline-item,
 .qa-item,
@@ -500,9 +502,18 @@ body.modal-open {
   margin: 12px 0 0;
 }
 
+.info-inlay {
+  margin-top: 14px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.info-inlay-head {
+  margin-bottom: 12px;
+}
+
 .live-area-actions {
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  margin-top: 14px;
 }
 
 .sound-grid,
