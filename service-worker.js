@@ -1,9 +1,10 @@
-const CACHE_NAME = "artemis-family-tracker-v11";
+const CACHE_NAME = "artemis-family-tracker-v12";
 const ASSETS = [
   "./",
   "./index.html",
   "./styles.css",
   "./app.js",
+  "./trajectory-data.json",
   "./manifest.webmanifest",
   "./icon.svg",
   "./images/reid-wiseman.jpg",

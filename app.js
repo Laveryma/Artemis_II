@@ -1,6 +1,7 @@
 const defaultLaunchTimeIso = "2026-04-01T22:35:00Z";
 const launchTimeStorageKey = "artemis-launch-time-iso";
 const soundPreferenceKey = "artemis-phase-chime-enabled";
+const trajectoryDataUrl = "./trajectory-data.json";
 const earthMoonDistanceKm = 384400;
 const maxMoonPassDistanceKm = 391800;
 const maxSpeedKmH = 32000;
@@ -118,7 +119,6 @@ const missionDays = [
 
 const prelaunchFamilyPrompt = "Count down together and remember how the rocket looked on the launch pad before Orion ever moved.";
 const postMissionFamilyPrompt = "The trip is complete. Pick your favourite family mission memory and the moment you would tell someone else about first.";
-const moonLoopReturnProgress = 0.18;
 
 const locationStates = [
   {
@@ -286,6 +286,7 @@ const dom = {
   crewList: document.getElementById("crewList"),
   orbitPathOutbound: document.getElementById("orbitPathOutbound"),
   orbitPathReturn: document.getElementById("orbitPathReturn"),
+  moonPlanet: document.getElementById("moonPlanet"),
   orionMarker: document.getElementById("orionMarker"),
   distanceToMoonValue: document.getElementById("distanceToMoonValue"),
   distanceToMoonFill: document.getElementById("distanceToMoonFill"),
@@ -313,6 +314,7 @@ const dom = {
 const AudioContextClass = window.AudioContext || window.webkitAudioContext;
 let audioContext;
 let lastPhase = "";
+let officialTrajectory = null;
 
 function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value));
@@ -410,7 +412,60 @@ function getLocationState(hoursElapsed) {
   return locationStates.find(item => hoursElapsed >= item.startHours && hoursElapsed < item.endHours) || locationStates[locationStates.length - 1];
 }
 
-function getEstimatedTelemetry(hoursElapsed) {
+function buildTrajectoryStateFromRow(row) {
+  return {
+    left: `${row[1] * 100}%`,
+    top: `${row[2] * 100}%`,
+    distanceFromEarthKm: row[3],
+    distanceToMoonKm: row[4],
+    speedKmH: row[5]
+  };
+}
+
+function getInterpolatedOfficialTrajectoryState(hoursElapsed) {
+  const samples = officialTrajectory?.samples;
+
+  if (!samples?.length || hoursElapsed < 0) {
+    return null;
+  }
+
+  if (hoursElapsed <= samples[0][0]) {
+    return buildTrajectoryStateFromRow(samples[0]);
+  }
+
+  const lastSample = samples[samples.length - 1];
+  if (hoursElapsed >= lastSample[0]) {
+    return buildTrajectoryStateFromRow(lastSample);
+  }
+
+  let low = 0;
+  let high = samples.length - 1;
+
+  while (high - low > 1) {
+    const middle = Math.floor((low + high) / 2);
+
+    if (samples[middle][0] <= hoursElapsed) {
+      low = middle;
+    } else {
+      high = middle;
+    }
+  }
+
+  const startRow = samples[low];
+  const endRow = samples[high];
+  const span = endRow[0] - startRow[0];
+  const amount = span > 0 ? clamp((hoursElapsed - startRow[0]) / span, 0, 1) : 0;
+
+  return {
+    left: `${lerp(startRow[1], endRow[1], amount) * 100}%`,
+    top: `${lerp(startRow[2], endRow[2], amount) * 100}%`,
+    distanceFromEarthKm: lerp(startRow[3], endRow[3], amount),
+    distanceToMoonKm: lerp(startRow[4], endRow[4], amount),
+    speedKmH: lerp(startRow[5], endRow[5], amount)
+  };
+}
+
+function getFallbackTelemetry(hoursElapsed) {
   if (hoursElapsed < 0) {
     return {
       distanceFromEarthKm: 0,
@@ -508,43 +563,61 @@ function getFallbackOrbitPosition(hoursElapsed) {
   return { left: `${left}%`, top: `${top}%` };
 }
 
-function getPointAlongOrbitPath(pathElement, progress) {
-  if (!pathElement || typeof pathElement.getTotalLength !== "function") {
-    return null;
+function getTrajectoryState(hoursElapsed) {
+  const officialState = getInterpolatedOfficialTrajectoryState(hoursElapsed);
+
+  if (officialState) {
+    return officialState;
   }
 
-  const svg = pathElement.ownerSVGElement;
-  const viewBox = svg?.viewBox?.baseVal;
-
-  if (!viewBox || !viewBox.width || !viewBox.height) {
-    return null;
-  }
-
-  const point = pathElement.getPointAtLength(pathElement.getTotalLength() * clamp(progress, 0, 1));
   return {
-    left: `${(point.x / viewBox.width) * 100}%`,
-    top: `${(point.y / viewBox.height) * 100}%`
+    ...getFallbackTelemetry(hoursElapsed),
+    ...getFallbackOrbitPosition(hoursElapsed)
   };
 }
 
-function getOrbitPosition(hoursElapsed) {
-  if (hoursElapsed < 0) {
-    return getFallbackOrbitPosition(hoursElapsed);
+function getTelemetryScale() {
+  return {
+    distanceFromEarthKm: officialTrajectory?.maxDistanceFromEarthKm || maxMoonPassDistanceKm,
+    distanceToMoonKm: officialTrajectory?.maxDistanceToMoonKm || earthMoonDistanceKm,
+    speedKmH: officialTrajectory?.maxSpeedKmH || maxSpeedKmH
+  };
+}
+
+function applyOfficialOrbitScene() {
+  if (!officialTrajectory) {
+    return;
   }
 
-  const clampedHours = clamp(hoursElapsed, 0, 240);
-
-  if (clampedHours <= 120) {
-    return getPointAlongOrbitPath(dom.orbitPathOutbound, clampedHours / 120) || getFallbackOrbitPosition(clampedHours);
+  if (dom.orbitPathOutbound && officialTrajectory.orbitPaths?.outbound) {
+    dom.orbitPathOutbound.setAttribute("d", officialTrajectory.orbitPaths.outbound);
   }
 
-  if (clampedHours <= 144) {
-    const t = (clampedHours - 120) / 24;
-    return getPointAlongOrbitPath(dom.orbitPathReturn, lerp(0, moonLoopReturnProgress, t)) || getFallbackOrbitPosition(clampedHours);
+  if (dom.orbitPathReturn && officialTrajectory.orbitPaths?.return) {
+    dom.orbitPathReturn.setAttribute("d", officialTrajectory.orbitPaths.return);
   }
 
-  const t = clamp((clampedHours - 144) / 96, 0, 1);
-  return getPointAlongOrbitPath(dom.orbitPathReturn, lerp(moonLoopReturnProgress, 1, t)) || getFallbackOrbitPosition(clampedHours);
+  if (dom.moonPlanet && officialTrajectory.moonDisplay) {
+    dom.moonPlanet.style.left = `${officialTrajectory.moonDisplay.left * 100}%`;
+    dom.moonPlanet.style.top = `${officialTrajectory.moonDisplay.top * 100}%`;
+    dom.moonPlanet.style.right = "auto";
+    dom.moonPlanet.style.bottom = "auto";
+    dom.moonPlanet.style.transform = "translate(-50%, -50%)";
+  }
+}
+
+async function loadOfficialTrajectory() {
+  try {
+    const response = await fetch(trajectoryDataUrl);
+    if (!response.ok) {
+      throw new Error("Could not load official trajectory data.");
+    }
+
+    officialTrajectory = await response.json();
+    applyOfficialOrbitScene();
+  } catch {
+    officialTrajectory = null;
+  }
 }
 
 function getOverlayCopy(hoursElapsed) {
@@ -899,8 +972,8 @@ function updateMissionView() {
   const currentMissionDayNumber = getCurrentMissionDayNumber(hoursElapsed);
   const currentDayOverlay = getOverlayCopy(hoursElapsed);
   const locationState = getLocationState(hoursElapsed);
-  const telemetry = getEstimatedTelemetry(hoursElapsed);
-  const position = getOrbitPosition(hoursElapsed);
+  const trajectoryState = getTrajectoryState(hoursElapsed);
+  const telemetryScale = getTelemetryScale();
   const liveNow = hoursElapsed >= 0 && hoursElapsed < 240;
 
   dom.missionClock.textContent = formatElapsed();
@@ -909,7 +982,7 @@ function updateMissionView() {
   dom.missionDayCounter.textContent = `${currentMissionDayNumber} of ${totalMissionDays}`;
   dom.missionDayCounterCompact.textContent = `${currentMissionDayNumber} of ${totalMissionDays}`;
   dom.routeLabel.textContent = locationState.route;
-  dom.distanceLabel.textContent = getBestEstimateLabel(hoursElapsed, telemetry);
+  dom.distanceLabel.textContent = getBestEstimateLabel(hoursElapsed, trajectoryState);
   dom.locationSummary.textContent = locationState.summary;
   dom.locationNarrative.textContent = locationState.narrative;
   dom.familyPrompt.textContent = getFamilyPrompt(hoursElapsed);
@@ -918,17 +991,17 @@ function updateMissionView() {
   dom.dayInfoBadge.textContent = currentDayOverlay.badge;
   dom.dayInfoTitle.textContent = currentDayOverlay.title;
   dom.dayInfoText.textContent = currentDayOverlay.summary;
-  dom.orionMarker.style.left = position.left;
-  dom.orionMarker.style.top = position.top;
+  dom.orionMarker.style.left = trajectoryState.left;
+  dom.orionMarker.style.top = trajectoryState.top;
   dom.liveStatusDot.classList.toggle("is-live", liveNow);
   dom.liveStatusDot.classList.toggle("is-idle", !liveNow);
 
-  dom.distanceToMoonValue.textContent = formatDistanceKm(telemetry.distanceToMoonKm);
-  dom.distanceFromEarthValue.textContent = formatDistanceKm(telemetry.distanceFromEarthKm);
-  dom.speedValue.textContent = formatSpeedKmH(telemetry.speedKmH);
-  setFill(dom.distanceToMoonFill, telemetry.distanceToMoonKm / earthMoonDistanceKm);
-  setFill(dom.distanceFromEarthFill, telemetry.distanceFromEarthKm / maxMoonPassDistanceKm);
-  setFill(dom.speedFill, telemetry.speedKmH / maxSpeedKmH);
+  dom.distanceToMoonValue.textContent = formatDistanceKm(trajectoryState.distanceToMoonKm);
+  dom.distanceFromEarthValue.textContent = formatDistanceKm(trajectoryState.distanceFromEarthKm);
+  dom.speedValue.textContent = formatSpeedKmH(trajectoryState.speedKmH);
+  setFill(dom.distanceToMoonFill, trajectoryState.distanceToMoonKm / telemetryScale.distanceToMoonKm);
+  setFill(dom.distanceFromEarthFill, trajectoryState.distanceFromEarthKm / telemetryScale.distanceFromEarthKm);
+  setFill(dom.speedFill, trajectoryState.speedKmH / telemetryScale.speedKmH);
 
   updateCrewDayDisplays(hoursElapsed);
   renderTimeline(hoursElapsed);
@@ -1003,6 +1076,9 @@ renderCrew();
 wireModals();
 wireSoundButtons();
 wireSettings();
+loadOfficialTrajectory().finally(() => {
+  updateMissionView();
+});
 updateMissionView();
 setInterval(updateMissionView, 30000);
 
